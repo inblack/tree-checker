@@ -1,6 +1,6 @@
 /**
  * app.js - Controller for the Tree Checker Dashboard
- * Optimized for local-first privacy and simple UI.
+ * Optimized for local-first privacy and professional Record Browser.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadBtn?.addEventListener('click', () => uploadInput.click());
     uploadInput?.addEventListener('change', handleFileUpload);
     
-    modalClose?.addEventListener('click', () => overlay.style.display = 'none');
+    modalClose?.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        overlay.classList.remove('modal-large');
+    });
     infoClose?.addEventListener('click', () => infoModal.style.display = 'none');
 
     // Wire all info icons
@@ -60,11 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const { diagnostics, stats } = parser.analyze();
         const score = parser.calculateScore();
 
-        // Update UI state
         emptyState.style.display = 'none';
         resultsSection.style.display = 'block';
 
-        // Update Score Card
         scoreElement.textContent = score;
         labelElement.textContent = getScoreLabel(score);
         
@@ -74,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateScoreColor(score);
 
-        // Render List
         listElement.innerHTML = '';
         
         const sortedDiagnostics = [...diagnostics].sort((a, b) => {
@@ -133,9 +133,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showDetails(item) {
         detailName.textContent = item.name;
-        errorDetails.innerHTML = item.errors.map(e => `
-            <li style="${e.severity === 3 ? 'color:#c62828; font-weight:700' : (e.severity === 2 ? 'color:#ef6c00;' : '')}">${e.msg}</li>
-        `).join('');
+        const currentRecord = parser.getFullRecord(item.id);
+        const dupError = item.errors.find(e => e.type === 'duplicate');
+
+        if (dupError) {
+            overlay.classList.add('modal-large');
+            const originalRecord = parser.getFullRecord(dupError.originalId);
+            renderComparison(originalRecord, currentRecord);
+        } else {
+            overlay.classList.remove('modal-large');
+            renderRecordDetail(item.errors, currentRecord);
+        }
         overlay.style.display = 'flex';
+    }
+
+    function renderRecordDetail(errors, record) {
+        errorDetails.innerHTML = `
+            <div class="detail-section">
+                <h4 style="color:#c62828; margin-bottom:0.5rem">❗ Flags:</h4>
+                <ul class="error-list">
+                    ${errors.map(e => `<li style="${e.severity === 3 ? 'color:#c62828; font-weight:700' : (e.severity === 2 ? 'color:#ef6c00;' : '')}">${e.msg}</li>`).join('')}
+                </ul>
+            </div>
+            ${renderRecordBody(record)}
+        `;
+    }
+
+    function renderComparison(original, duplicate) {
+        errorDetails.innerHTML = `
+            <div class="comparison-grid">
+                <div class="comp-col">
+                    <h4 class="comp-header">Original Record</h4>
+                    ${renderRecordBody(original)}
+                </div>
+                <div class="comp-col">
+                    <h4 class="comp-header" style="color:#c62828">Duplicate Record</h4>
+                    ${renderRecordBody(duplicate)}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderRecordBody(record) {
+        return `
+            <div class="detail-section">
+                <h4>🗂 Biography</h4>
+                <table class="data-table">
+                    ${record.events.map(ev => `
+                        <tr>
+                            <td class="label">${ev.type}</td>
+                            <td>${ev.date}<br><small>${ev.place}</small></td>
+                        </tr>
+                    `).join('')}
+                </table>
+            </div>
+            <div class="detail-section">
+                <h4>👪 Family</h4>
+                <table class="data-table">
+                    ${record.family.parents.map(p => `<tr><td class="label">${p.role}</td><td>${p.name}</td></tr>`).join('')}
+                    ${record.family.spouses.map(s => `
+                        <tr><td class="label">Spouse</td><td>${s.name}</td></tr>
+                        <tr><td class="label">Children</td><td>${s.children.join(', ') || 'None'}</td></tr>
+                    `).join('')}
+                </table>
+            </div>
+            ${record.sources.length ? `
+                <div class="detail-section">
+                    <h4>📚 Sources</h4>
+                    <ul class="source-list">${record.sources.map(s => `<li>${s}</li>`).join('')}</ul>
+                </div>
+            ` : ''}
+        `;
     }
 });

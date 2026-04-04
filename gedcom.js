@@ -1,5 +1,6 @@
 /**
  * GEDCOM.js - A lightweight parser and analyzer for GEDCOM 5.5 files.
+ * Correctly builds a tree structure for robust record analysis.
  */
 
 class GEDCOMParser {
@@ -10,13 +11,12 @@ class GEDCOMParser {
   reset() {
     this.individuals = new Map();
     this.families = new Map();
-    this.header = {};
+    this.header = null;
   }
 
   parse(content) {
     const lines = content.split('\n');
     let stack = [];
-    let currentObject = null;
 
     for (let line of lines) {
       line = line.trim();
@@ -28,21 +28,23 @@ class GEDCOMParser {
       const level = parseInt(match[1]);
       const id = match[2];
       const tag = match[3];
-      const data = match[4];
+      const data = match[4] || '';
 
       const node = { tag, data, tree: [] };
 
       if (level === 0) {
-        if (id) {
-          if (tag === 'INDI') {
-            currentObject = { id, tag, tree: [] };
-            this.individuals.set(id, currentObject);
-          } else if (tag === 'FAM') {
-            currentObject = { id, tag, tree: [] };
-            this.families.set(id, currentObject);
-          }
+        if (tag === 'INDI' && id) {
+          this.individuals.set(id, node);
+          stack = [node];
+        } else if (tag === 'FAM' && id) {
+          this.families.set(id, node);
+          stack = [node];
+        } else if (tag === 'HEAD') {
+          this.header = node;
+          stack = [node];
+        } else {
+          stack = [node];
         }
-        stack = [currentObject];
       } else {
         while (stack.length > level) {
           stack.pop();
@@ -56,27 +58,32 @@ class GEDCOMParser {
     }
   }
 
-  getIndividual(id) {
-    return this.individuals.get(id);
-  }
-
   getTag(node, tag) {
+    if (!node || !node.tree) return null;
     return node.tree.find(n => n.tag === tag);
   }
 
+  findAllTags(node, tag) {
+    let results = [];
+    if (!node || !node.tree) return results;
+    for (let child of node.tree) {
+      if (child.tag === tag) results.push(child);
+    }
+    return results;
+  }
+
   getName(indi) {
+    if (!indi) return 'Unknown';
     const nameNode = this.getTag(indi, 'NAME');
     return nameNode ? nameNode.data.replace(/\//g, '').trim() : 'Unknown';
   }
 
-  getBirthYear(indi) {
-    const birt = this.getTag(indi, 'BIRT');
-    if (birt) {
-      const date = this.getTag(birt, 'DATE');
-      if (date) {
-        const year = date.data.match(/\d{4}/);
-        return year ? year[0] : null;
-      }
+  getYear(node) {
+    if (!node) return null;
+    const dateNode = this.getTag(node, 'DATE');
+    if (dateNode) {
+      const yearMatch = dateNode.data.match(/\d{4}/);
+      return yearMatch ? yearMatch[0] : null;
     }
     return null;
   }
@@ -88,39 +95,42 @@ class GEDCOMParser {
 
     for (let [id, indi] of this.individuals) {
       const name = this.getName(indi);
-      const birthYear = this.getYear(this.getTag(indi, 'BIRT'));
-      const deathYear = this.getYear(this.getTag(indi, 'DEAT'));
+      const birthNode = this.getTag(indi, 'BIRT');
+      const deathNode = this.getTag(indi, 'DEAT');
+      const birthYear = this.getYear(birthNode);
+      const deathYear = this.getYear(deathNode);
       const errors = [];
 
-      // 1. HIGH: Possible Duplicates (Target: 603)
-      // matching on name + approximate birth/death years or marriage
+      // 1. HIGH: Possible Duplicates
       const key = `${name.toLowerCase()}|${birthYear || '?'}`;
       if (nameMap.has(key)) {
         const original = nameMap.get(key);
-        errors.push({ type: 'duplicate', msg: `❗ LVL 3: 🛑 DUPLICATE of ${original.name} (${original.years})`, severity: 3 });
+        errors.push({ 
+          type: 'duplicate', 
+          msg: `❗ LVL 3: 🛑 DUPLICATE of ${original.name} (${original.years})`, 
+          severity: 3,
+          originalId: original.id 
+        });
         stats.high++;
       } else {
         nameMap.set(key, { id, name, years: `${birthYear || '?'}-${deathYear || '?'}` });
       }
 
-      // 2. MEDIUM: Other Possible Errors / Logic (Target: 21)
-      // Check Birth vs Death order
+      // 2. MEDIUM: Logic Errors
       if (birthYear && deathYear && parseInt(birthYear) > parseInt(deathYear)) {
         errors.push({ type: 'logic', msg: `⚠️ LVL 2: ⚠️ LOGIC ERROR: Birth (${birthYear}) occurred after Death (${deathYear})`, severity: 2 });
         stats.med++;
       }
 
-      // 3. LOW: No Documentation (Target: 2323)
-      // Check for SOUR (Source) tags
+      // 3. LOW: Documentation
       const hasSources = this.findAllTags(indi, 'SOUR').length > 0;
       if (!hasSources) {
-        errors.push({ type: 'doc', msg: `ℹ️ LVL 1: ℹ️ DOCUMENTATION: No source records found for this individual`, severity: 1 });
+        errors.push({ type: 'doc', msg: `ℹ️ LVL 1: ℹ️ DOCUMENTATION: No source records found`, severity: 1 });
         stats.low++;
       }
 
-      // 4. LOW: Missing Locations (Optional Gap)
-      const birt = this.getTag(indi, 'BIRT');
-      if (birt && !this.getTag(birt, 'PLAC')) {
+      // 4. LOW: Missing Locations
+      if (birthNode && !this.getTag(birthNode, 'PLAC')) {
           errors.push({ type: 'gap', msg: `ℹ️ LVL 1: ℹ️ DATA GAP: Missing Birth location data`, severity: 1 });
           stats.low++;
       }
@@ -133,35 +143,65 @@ class GEDCOMParser {
     return { diagnostics, stats };
   }
 
-  getYear(node) {
-    if (!node) return null;
-    const date = this.getTag(node, 'DATE');
-    if (date) {
-      const year = date.data.match(/\d{4}/);
-      return year ? year[0] : null;
-    }
-    return null;
-  }
+  getFullRecord(id) {
+    const indi = this.individuals.get(id);
+    if (!indi) return null;
 
-  findAllTags(node, tag) {
-    let results = [];
-    if (!node || !node.tree) return results;
-    for (let child of node.tree) {
-      if (child.tag === tag) results.push(child);
-      results = results.concat(this.findAllTags(child, tag));
-    }
-    return results;
+    const data = {
+      id,
+      name: this.getName(indi),
+      events: [],
+      family: { parents: [], spouses: [] },
+      sources: this.findAllTags(indi, 'SOUR').map(s => s.data)
+    };
+
+    // Life Events
+    const eventTypes = ['BIRT', 'DEAT', 'BURI', 'CHR', 'RESI', 'MARR', 'GRAD', 'OCCU'];
+    eventTypes.forEach(type => {
+      const node = this.getTag(indi, type);
+      if (node) {
+        data.events.push({
+          type,
+          date: this.getTag(node, 'DATE')?.data || 'Unknown',
+          place: this.getTag(node, 'PLAC')?.data || 'Unknown'
+        });
+      }
+    });
+
+    // Family Links
+    this.findAllTags(indi, 'FAMC').forEach(ref => {
+      const fam = this.families.get(ref.data);
+      if (fam) {
+        const husbId = this.getTag(fam, 'HUSB')?.data;
+        const wifeId = this.getTag(fam, 'WIFE')?.data;
+        if (husbId) data.family.parents.push({ role: 'Father', name: this.getName(this.individuals.get(husbId)) });
+        if (wifeId) data.family.parents.push({ role: 'Mother', name: this.getName(this.individuals.get(wifeId)) });
+      }
+    });
+
+    this.findAllTags(indi, 'FAMS').forEach(ref => {
+      const fam = this.families.get(ref.data);
+      if (fam) {
+        const spouseId = (this.getTag(fam, 'HUSB')?.data === id) ? this.getTag(fam, 'WIFE')?.data : this.getTag(fam, 'HUSB')?.data;
+        if (spouseId) {
+          const spouse = { name: this.getName(this.individuals.get(spouseId)), children: [] };
+          this.findAllTags(fam, 'CHIL').forEach(chil => {
+            const childIndi = this.individuals.get(chil.data);
+            if (childIndi) spouse.children.push(this.getName(childIndi));
+          });
+          data.family.spouses.push(spouse);
+        }
+      }
+    });
+
+    return data;
   }
 
   calculateScore() {
-    let totalScore = 10;
-    const { stats } = this.analyze();
-    
-    let totalPenalty = (stats.high * 0.8) + (stats.med * 0.3) + (stats.low * 0.1);
-    
-    // Scale penalty by tree size
-    const scaledPenalty = Math.min(8, (totalPenalty / (this.individuals.size / 20)));
-    return Math.max(0, totalScore - scaledPenalty).toFixed(1);
+    const stats = this.analyze().stats;
+    const totalPenalty = (stats.high * 0.8) + (stats.med * 0.3) + (stats.low * 0.1);
+    const scaledPenalty = Math.min(8, (totalPenalty / (this.individuals.size / 20 || 1)));
+    return Math.max(0, 10 - scaledPenalty).toFixed(1);
   }
 }
 

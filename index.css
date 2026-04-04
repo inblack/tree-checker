@@ -84,11 +84,93 @@ body {
 
 .privacy-note { font-size: 0.8rem; margin-top: 1rem; opacity: 0.8; }
 
-/* Modal Overlay */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+/* Details Overlay & Record Browser */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(18, 18, 18, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    z-index: 1000;
+}
 
-.modal-card { background: white; border-radius: 12px; max-width: 400px; width: 100%; padding: 2rem; box-shadow: var(--shadow-md); }
+.modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    color: #333;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
 
-.error-details-list { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; font-size: 0.9rem; }
+.modal-large .modal-card {
+    max-width: 900px;
+}
+
+.detail-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    text-align: left;
+}
+
+.detail-section h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 0.75rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table td {
+    padding: 0.5rem 0;
+    vertical-align: top;
+}
+
+.data-table .label {
+    width: 80px;
+    color: #777;
+    font-weight: 600;
+}
+
+/* Comparison Layout */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    text-align: left;
+}
+
+.comp-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+@media (max-width: 768px) {
+    .comparison-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.source-list {
+    list-style: none;
+    font-size: 0.8rem;
+    color: #666;
+    background: #f9f9f9;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
 
 .btn-full { width: 100%; padding: 0.8rem; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
