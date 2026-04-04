@@ -16,15 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailName = document.getElementById('detail-name');
     const errorDetails = document.getElementById('error-details');
     const modalClose = document.getElementById('modal-close');
-
-    const countHigh = document.getElementById('count-high');
-    const countMed = document.getElementById('count-med');
-    const countLow = document.getElementById('count-low');
+    const infoModal = document.getElementById('info-modal');
+    const infoClose = document.getElementById('info-close');
 
     // Event Listeners
     uploadBtn?.addEventListener('click', () => uploadInput.click());
     uploadInput?.addEventListener('change', handleFileUpload);
     modalClose?.addEventListener('click', () => overlay.style.display = 'none');
+    infoClose?.addEventListener('click', () => infoModal.style.display = 'none');
+
+    document.querySelectorAll('.info-icon').forEach(icon => {
+        icon.style.cursor = 'pointer';
+        icon.onclick = () => infoModal.style.display = 'flex';
+    });
 
     function handleFileUpload(e) {
         const file = e.target.files[0];

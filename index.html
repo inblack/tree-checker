@@ -33,7 +33,7 @@
                     <span id="count-high" class="count high">0</span>
                 </div>
                 <div class="breakdown-item">
-                    <span>🔴 Other Possible Errors (Med)</span>
+                    <span>⚠️ Other Possible Errors (Med)</span>
                     <span id="count-med" class="count med">0</span>
                 </div>
                 <div class="breakdown-item">
@@ -50,6 +50,27 @@
             </ul>
         </section>
 
+        <div id="info-modal" class="overlay" style="display: none;">
+        <div class="modal-card">
+            <h3>Tree Health Guide</h3>
+            <div style="margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem;">
+                <p><strong>❗ LVL 3: DUPLICATE</strong>: Two individuals with the same name and birth year. These should be merged.</p>
+                <p><strong>⚠️ LVL 2: LOGIC ERROR</strong>: Chronological inconsistencies like a birth date occurring after a death date.</p>
+                <p><strong>ℹ️ LVL 1: DOCUMENTATION</strong>: Records missing source tags (SOUR) or specific location data (PLAC).</p>
+            </div>
+            <button id="info-close" class="btn-full">Got it</button>
+        </div>
+    </div>
+
+    <!-- Modal for Error Details -->
+    <div id="details-overlay" class="overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 id="detail-name"></h3>
+            <ul id="error-details" class="error-details-list"></ul>
+            <button id="modal-close" class="btn-full">Close</button>
+        </div>
+    </div>
+
         <section id="empty-state" class="empty-state">
             <div class="empty-content">
                 <svg viewBox="0 0 24 24" width="64" height="64" fill="#ccc" style="margin-bottom: 1rem;">
@@ -61,10 +82,6 @@
         </section>
     </div>
 
-    <!-- Modal for Error Details -->
-    <div id="details-overlay" class="overlay" style="display: none;">
-        <div class="modal-card">
-            <h3 id="detail-name"></h3>
             <ul id="error-details" class="error-details-list"></ul>
             <button id="modal-close" class="btn-full">Close</button>
         </div>

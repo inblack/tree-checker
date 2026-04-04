@@ -106,7 +106,7 @@ class GEDCOMParser {
       // 2. MEDIUM: Other Possible Errors / Logic (Target: 21)
       // Check Birth vs Death order
       if (birthYear && deathYear && parseInt(birthYear) > parseInt(deathYear)) {
-        errors.push({ type: 'logic', msg: `🔴 LVL 2: ⚠️ LOGIC ERROR: Birth (${birthYear}) occurred after Death (${deathYear})`, severity: 2 });
+        errors.push({ type: 'logic', msg: `⚠️ LVL 2: ⚠️ LOGIC ERROR: Birth (${birthYear}) occurred after Death (${deathYear})`, severity: 2 });
         stats.med++;
       }
 
