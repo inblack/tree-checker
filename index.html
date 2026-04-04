@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 id="page-title">Tree Checker <span class="info-icon" title="Analyze your GEDCOM file for duplicates and structural errors.">ⓘ</span></h1>
+            <h1 id="page-title">Tree Checker <span class="info-icon" style="cursor:pointer; opacity:0.6;">ⓘ</span></h1>
             <div style="display: flex; gap: 0.5rem;">
                 <input type="file" id="upload-input" accept=".ged" style="display:none">
                 <button id="upload-btn" class="btn-primary">
@@ -44,32 +44,9 @@
         </section>
 
         <section class="errors-section" id="results-section" style="display: none;">
-            <h2 class="section-title">Ancestors errors to review <span class="info-icon" title="Click an ancestor to see details. High priority errors are highlighted in red.">ⓘ</span></h2>
-            <ul class="ancestor-list" id="ancestor-list">
-                <!-- Ancestors will be injected here -->
-            </ul>
+            <h2 class="section-title">Ancestors errors to review <span class="info-icon" style="cursor:pointer; opacity:0.6;">ⓘ</span></h2>
+            <ul class="ancestor-list" id="ancestor-list"></ul>
         </section>
-
-        <div id="info-modal" class="overlay" style="display: none;">
-        <div class="modal-card">
-            <h3>Tree Health Guide</h3>
-            <div style="margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem;">
-                <p><strong>❗ LVL 3: DUPLICATE</strong>: Two individuals with the same name and birth year. These should be merged.</p>
-                <p><strong>⚠️ LVL 2: LOGIC ERROR</strong>: Chronological inconsistencies like a birth date occurring after a death date.</p>
-                <p><strong>ℹ️ LVL 1: DOCUMENTATION</strong>: Records missing source tags (SOUR) or specific location data (PLAC).</p>
-            </div>
-            <button id="info-close" class="btn-full">Got it</button>
-        </div>
-    </div>
-
-    <!-- Modal for Error Details -->
-    <div id="details-overlay" class="overlay" style="display: none;">
-        <div class="modal-card">
-            <h3 id="detail-name"></h3>
-            <ul id="error-details" class="error-details-list"></ul>
-            <button id="modal-close" class="btn-full">Close</button>
-        </div>
-    </div>
 
         <section id="empty-state" class="empty-state">
             <div class="empty-content">
@@ -82,6 +59,23 @@
         </section>
     </div>
 
+    <!-- Tree Health Guide Modal -->
+    <div id="info-modal" class="overlay" style="display: none;">
+        <div class="modal-card">
+            <h3>Tree Health Guide</h3>
+            <div style="margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem; line-height: 1.6;">
+                <p style="margin-bottom:0.8rem;"><strong>❗ LVL 3: DUPLICATE</strong>: Two individuals with the same name and birth year. These should be merged.</p>
+                <p style="margin-bottom:0.8rem;"><strong>⚠️ LVL 2: LOGIC ERROR</strong>: Chronological inconsistencies like a birth date occurring after a death date.</p>
+                <p><strong>ℹ️ LVL 1: DOCUMENTATION</strong>: Records missing source tags (SOUR) or specific location data (PLAC).</p>
+            </div>
+            <button id="info-close" class="btn-full">Got it</button>
+        </div>
+    </div>
+
+    <!-- Error Details Modal -->
+    <div id="details-overlay" class="overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 id="detail-name" style="margin-bottom: 1rem;"></h3>
             <ul id="error-details" class="error-details-list"></ul>
             <button id="modal-close" class="btn-full">Close</button>
         </div>
