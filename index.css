@@ -61,24 +61,66 @@ body {
 
 .info-icon { margin-left: 0.5rem; font-size: 0.9rem; cursor: help; color: var(--text-dim); opacity: 0.7; }
 
-/* List */
-.ancestor-list { background: var(--card-bg); list-style: none; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); }
+/* List & Accordion */
+.ancestor-list { background: var(--card-bg); list-style: none; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); overflow: hidden; }
 
-.ancestor-item { display: flex; padding: 1rem; border-bottom: 1px solid #efefef; cursor: pointer; transition: background 0.2s; }
-
+.ancestor-item { border-bottom: 1px solid #efefef; }
 .ancestor-item:last-child { border-bottom: none; }
 
-.ancestor-item:hover { background: #fafafa; }
+.item-header { display: flex; padding: 1.25rem 1rem; cursor: pointer; transition: background 0.2s; }
+.item-header:hover { background: #fafafa; }
 
-.avatar { width: 44px; height: 44px; border-radius: 50%; background: #eee; margin-right: 1rem; display: flex; align-items: center; justify-content: center; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: #eee; margin-right: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
 .ancestor-info h3 { font-size: 1rem; color: #0b69a3; margin-bottom: 0.25rem; }
-
 .years { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.4rem; }
-
 .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.error-tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: #f5f5f5; color: #666; font-weight: 600; border: 1px solid #eee; }
 
-.error-tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: #f5f5f5; color: #666; font-weight: 600; }
+/* Inline Expandable Details */
+.expandable-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+    background: #fafafa;
+    padding: 0 1rem;
+    opacity: 0;
+}
+
+.ancestor-item.expanded .expandable-content {
+    max-height: 2500px;
+    padding: 1rem 1rem 2rem 1rem;
+    opacity: 1;
+    border-top: 1px solid #efefef;
+}
+
+.ancestor-item.expanded .item-header, 
+.ancestor-item.expanded .duplicate-pair-header {
+    background: #fdfdfd;
+}
+
+/* Side-by-Side Duplicate Pairs */
+.duplicate-pair-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    background: #fffcfc;
+}
+.duplicate-pair-header:hover { background: #fafafa; }
+.duplicate-pair-header .item-sub-col { display: flex; }
+
+.duplicate-expanded-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .duplicate-pair-header, .duplicate-expanded-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
 
 .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-dim); }
 
@@ -143,7 +185,7 @@ body {
     font-weight: 600;
 }
 
-/* Comparison Layout */
+/* Comparison Layout (Retained from modal implementation for re-use if needed, but mainly we use duplicate-expanded-grid now) */
 .comparison-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -157,11 +199,7 @@ body {
     font-weight: 800;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #eee;
-}
-
-@media (max-width: 768px) {
-    .comparison-grid { grid-template-columns: 1fr; gap: 1rem; }
+    border-bottom: 2px solid #ddd;
 }
 
 .source-list {

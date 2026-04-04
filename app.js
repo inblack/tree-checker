@@ -12,13 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadBtn = document.getElementById('upload-btn');
     const emptyState = document.getElementById('empty-state');
     const resultsSection = document.getElementById('results-section');
-    
-    // Details Modal
-    const overlay = document.getElementById('details-overlay');
-    const detailName = document.getElementById('detail-name');
-    const errorDetails = document.getElementById('error-details');
-    const modalClose = document.getElementById('modal-close');
-    
     // Info Modal
     const infoModal = document.getElementById('info-modal');
     const infoClose = document.getElementById('info-close');
@@ -32,10 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadBtn?.addEventListener('click', () => uploadInput.click());
     uploadInput?.addEventListener('change', handleFileUpload);
     
-    modalClose?.addEventListener('click', () => {
-        overlay.style.display = 'none';
-        overlay.classList.remove('modal-large');
-    });
     infoClose?.addEventListener('click', () => infoModal.style.display = 'none');
 
     // Wire all info icons
@@ -91,26 +80,95 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedDiagnostics.forEach(item => {
             const li = document.createElement('li');
             li.className = 'ancestor-item';
-            const birthInfo = item.birthYear ? `${item.birthYear} - ` : '';
             
-            li.innerHTML = `
-                <div class="avatar">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#777">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                </div>
-                <div class="ancestor-info">
-                    <h3>${item.name}</h3>
-                    <div class="years">${birthInfo}</div>
-                    <div class="tags">
-                        ${item.errors.slice(0, 2).map(e => `
-                            <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">${e.msg.split(':')[0]}</span>
-                        `).join('')}
-                        ${item.errors.length > 2 ? `<span class="error-tag">+${item.errors.length - 2} more</span>` : ''}
+            // Calculate Individual Score
+            let penalty = 0;
+            item.errors.forEach(e => {
+                if (e.severity === 3) penalty += 5; // HIGH (Duplicate)
+                else if (e.severity === 2) penalty += 2; // MED (Logic)
+                else penalty += 0.5; // LOW (Docs/Gap)
+            });
+            const indivScore = Math.max(0, 10 - penalty).toFixed(1);
+            let scoreColor = '#c62828'; // red
+            if (indivScore >= 8) scoreColor = '#2e7d32'; // green
+            else if (indivScore >= 5) scoreColor = '#f57c00'; // orange
+            
+            const currentRecord = parser.getFullRecord(item.id);
+            const dupError = item.errors.find(e => e.type === 'duplicate');
+
+            if (dupError) {
+                const originalRecord = parser.getFullRecord(dupError.originalId);
+                
+                li.innerHTML = `
+                    <div class="duplicate-pair-header">
+                        <div class="item-sub-col">
+                            <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                            <div class="ancestor-info">
+                                <h3>${originalRecord.name} (Original)</h3>
+                                <div class="years">${getBirthInfo(originalRecord)}</div>
+                                <div class="tags"><span class="error-tag" style="background:#e0f7fa;color:#006064">Original Record</span></div>
+                            </div>
+                        </div>
+                        <div class="item-sub-col">
+                            <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                            <div class="ancestor-info">
+                                <h3>${currentRecord.name}</h3>
+                                <div class="years">${getBirthInfo(currentRecord)}</div>
+                                <div class="tags"><span class="error-tag" style="background:#ffebee;color:#c62828">❗ Duplicate</span></div>
+                            </div>
+                        </div>
+                        <div style="margin-left:auto; display:flex; align-items:center; font-size:1.4rem; font-weight:800; color:${scoreColor}; padding-left:1rem;">
+                            ${indivScore} <span style="font-size:0.8rem; font-weight:400; color:#888; margin-left:2px;">/10</span>
+                        </div>
                     </div>
-                </div>
-            `;
-            li.onclick = () => showDetails(item);
+                    <div class="expandable-content">
+                        <div class="duplicate-expanded-grid">
+                            <div class="comp-col">
+                                ${renderRecordBody(originalRecord)}
+                            </div>
+                            <div class="comp-col">
+                                ${renderRecordBody(currentRecord)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                const header = li.querySelector('.duplicate-pair-header');
+                header.onclick = () => li.classList.toggle('expanded');
+                
+            } else {
+                li.innerHTML = `
+                    <div class="item-header">
+                        <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                        <div class="ancestor-info">
+                            <h3>${currentRecord.name}</h3>
+                            <div class="years">${getBirthInfo(currentRecord)}</div>
+                            <div class="tags">
+                                ${item.errors.slice(0, 2).map(e => `
+                                    <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">${e.msg.split(':')[0]}</span>
+                                `).join('')}
+                                ${item.errors.length > 2 ? `<span class="error-tag">+${item.errors.length - 2} more</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="margin-left:auto; display:flex; align-items:center; font-size:1.4rem; font-weight:800; color:${scoreColor}; padding-left:1rem;">
+                            ${indivScore} <span style="font-size:0.8rem; font-weight:400; color:#888; margin-left:2px;">/10</span>
+                        </div>
+                    </div>
+                    <div class="expandable-content">
+                        <div class="detail-section">
+                            <h4 style="color:#c62828; margin-bottom:0.5rem">❗ Flags:</h4>
+                            <ul style="list-style:none; padding:0; margin:0; margin-bottom: 1rem;">
+                                ${item.errors.map(e => `<li style="${e.severity === 3 ? 'color:#c62828; font-weight:700' : (e.severity === 2 ? 'color:#ef6c00;' : '')}; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">${e.msg}</li>`).join('')}
+                            </ul>
+                        </div>
+                        ${renderRecordBody(currentRecord)}
+                    </div>
+                `;
+                
+                const header = li.querySelector('.item-header');
+                header.onclick = () => li.classList.toggle('expanded');
+            }
+            
             listElement.appendChild(li);
         });
     }
@@ -131,47 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
         else bg.style.background = '#d32f2f';
     }
 
-    function showDetails(item) {
-        detailName.textContent = item.name;
-        const currentRecord = parser.getFullRecord(item.id);
-        const dupError = item.errors.find(e => e.type === 'duplicate');
-
-        if (dupError) {
-            overlay.classList.add('modal-large');
-            const originalRecord = parser.getFullRecord(dupError.originalId);
-            renderComparison(originalRecord, currentRecord);
-        } else {
-            overlay.classList.remove('modal-large');
-            renderRecordDetail(item.errors, currentRecord);
-        }
-        overlay.style.display = 'flex';
-    }
-
-    function renderRecordDetail(errors, record) {
-        errorDetails.innerHTML = `
-            <div class="detail-section">
-                <h4 style="color:#c62828; margin-bottom:0.5rem">❗ Flags:</h4>
-                <ul class="error-list">
-                    ${errors.map(e => `<li style="${e.severity === 3 ? 'color:#c62828; font-weight:700' : (e.severity === 2 ? 'color:#ef6c00;' : '')}">${e.msg}</li>`).join('')}
-                </ul>
-            </div>
-            ${renderRecordBody(record)}
-        `;
-    }
-
-    function renderComparison(original, duplicate) {
-        errorDetails.innerHTML = `
-            <div class="comparison-grid">
-                <div class="comp-col">
-                    <h4 class="comp-header">Original Record</h4>
-                    ${renderRecordBody(original)}
-                </div>
-                <div class="comp-col">
-                    <h4 class="comp-header" style="color:#c62828">Duplicate Record</h4>
-                    ${renderRecordBody(duplicate)}
-                </div>
-            </div>
-        `;
+    function getBirthInfo(record) {
+        const birthEvent = record.events.find(e => e.type === 'BIRT');
+        const deathEvent = record.events.find(e => e.type === 'DEAT');
+        const by = birthEvent ? (birthEvent.date.match(/\d{4}/) ? birthEvent.date.match(/\d{4}/)[0] : '?') : '?';
+        const dy = deathEvent ? (deathEvent.date.match(/\d{4}/) ? deathEvent.date.match(/\d{4}/)[0] : '?') : '?';
+        return `${by} - ${dy}`;
     }
 
     function renderRecordBody(record) {
