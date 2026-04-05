@@ -152,8 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function getShortError(msg) {
         if (msg.includes('DUPLICATE')) return 'Duplicate Record';
         if (msg.includes('LOGIC ERROR')) return 'Timeline Logic Issue';
-        if (msg.includes('DOCUMENTATION')) return 'Missing Sources';
-        if (msg.includes('DATA GAP')) return 'Missing Locations';
         return 'Flagged';
     }
 

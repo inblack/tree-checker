@@ -123,19 +123,6 @@ class GEDCOMParser {
         stats.med++;
       }
 
-      // 3. LOW: Documentation
-      const hasSources = this.findAllTags(indi, 'SOUR').length > 0;
-      if (!hasSources) {
-        errors.push({ type: 'doc', msg: `ℹ️ LVL 1: ℹ️ DOCUMENTATION: No source records found`, severity: 1 });
-        stats.low++;
-      }
-
-      // 4. LOW: Missing Locations
-      if (birthNode && !this.getTag(birthNode, 'PLAC')) {
-          errors.push({ type: 'gap', msg: `ℹ️ LVL 1: ℹ️ DATA GAP: Missing Birth location data`, severity: 1 });
-          stats.low++;
-      }
-
       if (errors.length > 0) {
         diagnostics.push({ id, name, birthYear, errors });
       }
@@ -200,7 +187,7 @@ class GEDCOMParser {
 
   calculateScore() {
     const stats = this.analyze().stats;
-    const totalPenalty = (stats.high * 0.8) + (stats.med * 0.3) + (stats.low * 0.1);
+    const totalPenalty = (stats.high * 0.8) + (stats.med * 0.3);
     const scaledPenalty = Math.min(8, (totalPenalty / (this.individuals.size / 20 || 1)));
     return Math.max(0, 10 - scaledPenalty).toFixed(1);
   }
