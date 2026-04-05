@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.includes('DUPLICATE')) return 'Duplicate Record';
         if (msg.includes('LOGIC ERROR')) return 'Timeline Logic Issue';
         if (msg.includes('DISCONNECTED')) return 'Disconnected Record';
+        if (msg.includes('MULTIPLE FAMILIES')) return 'Multiple Families';
         return 'Flagged';
     }
 
@@ -180,10 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="detail-section">
                 <h4>👪 Family</h4>
                 <table class="data-table">
-                    ${record.family.parents.map(p => `<tr><td class="label">${p.role}</td><td>${p.name}</td></tr>`).join('')}
+                    ${record.family.parents.map(set => `
+                        <tr><td class="label" style="background:#f0f7ff; font-weight:700">Family ${set.id}</td><td></td></tr>
+                        ${set.parents.map(p => `<tr><td class="label" style="padding-left:1.5rem">${p.role}</td><td>${p.name}</td></tr>`).join('')}
+                    `).join('')}
+                    ${record.family.spouses.length ? `<tr><td class="label" style="background:#fcf8f2; font-weight:700">Marriages</td><td></td></tr>` : ''}
                     ${record.family.spouses.map(s => `
-                        <tr><td class="label">Spouse</td><td>${s.name}</td></tr>
-                        <tr><td class="label">Children</td><td>${s.children.join(', ') || 'None'}</td></tr>
+                        <tr><td class="label" style="padding-left:1.5rem">Spouse</td><td>${s.name}</td></tr>
+                        <tr><td class="label" style="padding-left:1.5rem">Children</td><td>${s.children.join(', ') || 'None'}</td></tr>
                     `).join('')}
                 </table>
             </div>

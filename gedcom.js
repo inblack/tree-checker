@@ -123,6 +123,13 @@ class GEDCOMParser {
         stats.med++;
       }
 
+      // 3. HIGH: Multiple Pedigrees (Parents)
+      const famcNodes = this.findAllTags(indi, 'FAMC');
+      if (famcNodes.length > 1) {
+        errors.push({ type: 'multiple_families', msg: `❗ LVL 3: 🛑 MULTIPLE FAMILIES: Linked to ${famcNodes.length} different families as a child`, severity: 3 });
+        stats.high++;
+      }
+
       if (errors.length > 0) {
         diagnostics.push({ id, name, birthYear, errors });
       }
@@ -241,8 +248,10 @@ class GEDCOMParser {
       if (fam) {
         const husbId = this.getTag(fam, 'HUSB')?.data;
         const wifeId = this.getTag(fam, 'WIFE')?.data;
-        if (husbId) data.family.parents.push({ role: 'Father', name: this.getName(this.individuals.get(husbId)) });
-        if (wifeId) data.family.parents.push({ role: 'Mother', name: this.getName(this.individuals.get(wifeId)) });
+        const familySet = { id: ref.data, parents: [] };
+        if (husbId) familySet.parents.push({ role: 'Father', name: this.getName(this.individuals.get(husbId)) });
+        if (wifeId) familySet.parents.push({ role: 'Mother', name: this.getName(this.individuals.get(wifeId)) });
+        data.family.parents.push(familySet);
       }
     });
 
