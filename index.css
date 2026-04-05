@@ -67,10 +67,8 @@ body {
 .ancestor-item { border-bottom: 1px solid #efefef; }
 .ancestor-item:last-child { border-bottom: none; }
 
-.item-header { display: flex; padding: 1.25rem 1rem; cursor: pointer; transition: background 0.2s; }
+.item-header { display: flex; padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; }
 .item-header:hover { background: #fafafa; }
-
-.avatar { width: 44px; height: 44px; border-radius: 50%; background: #eee; margin-right: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
 .ancestor-info h3 { font-size: 1rem; color: #0b69a3; margin-bottom: 0.25rem; }
 .years { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.4rem; }
@@ -103,7 +101,7 @@ body {
 .duplicate-pair-header {
     display: flex;
     flex-direction: column;
-    padding: 1.25rem 1rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     transition: background 0.2s;
     background: #fdfdfd;
@@ -113,18 +111,18 @@ body {
 .duplicate-pair-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
     width: 100%;
 }
 
 .indiv-box {
-    border: 2px solid #eaeaea;
-    border-radius: 8px;
-    padding: 1rem;
+    border: 1px solid #eaeaea;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
     display: flex;
     align-items: center;
     background: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
 .duplicate-expanded-grid {
