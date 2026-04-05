@@ -5,21 +5,14 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const parser = new GEDCOMParser();
-    const listElement = document.getElementById('ancestor-list');
-    const scoreElement = document.getElementById('health-score');
-    const labelElement = document.getElementById('health-label');
     const uploadInput = document.getElementById('upload-input');
     const uploadBtn = document.getElementById('upload-btn');
     const emptyState = document.getElementById('empty-state');
     const resultsSection = document.getElementById('results-section');
+    
     // Info Modal
     const infoModal = document.getElementById('info-modal');
     const infoClose = document.getElementById('info-close');
-
-    // Counts
-    const countHigh = document.getElementById('count-high');
-    const countMed = document.getElementById('count-med');
-    const countLow = document.getElementById('count-low');
 
     // Event Listeners
     uploadBtn?.addEventListener('click', () => uploadInput.click());
@@ -49,20 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderDashboard() {
-        const { diagnostics, stats } = parser.analyze();
-        const score = parser.calculateScore();
+        const { diagnostics } = parser.analyze();
 
         emptyState.style.display = 'none';
         resultsSection.style.display = 'block';
-
-        scoreElement.textContent = score;
-        labelElement.textContent = getScoreLabel(score);
-        
-        countHigh.textContent = stats.high;
-        countMed.textContent = stats.med;
-        countLow.textContent = stats.low;
-
-        updateScoreColor(score);
 
         listElement.innerHTML = '';
         
@@ -80,18 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedDiagnostics.forEach(item => {
             const li = document.createElement('li');
             li.className = 'ancestor-item';
-            
-            // Calculate Individual Score
-            let penalty = 0;
-            item.errors.forEach(e => {
-                if (e.severity === 3) penalty += 5; // HIGH (Duplicate)
-                else if (e.severity === 2) penalty += 2; // MED (Logic)
-                else penalty += 0.5; // LOW (Docs/Gap)
-            });
-            const indivScore = Math.max(0, 10 - penalty).toFixed(1);
-            let scoreColor = '#c62828'; // red
-            if (indivScore >= 8) scoreColor = '#2e7d32'; // green
-            else if (indivScore >= 5) scoreColor = '#f57c00'; // orange
             
             const currentRecord = parser.getFullRecord(item.id);
             const dupError = item.errors.find(e => e.type === 'duplicate');
@@ -169,28 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function getScoreLabel(score) {
-        if (score >= 9) return 'Excellent';
-        if (score >= 7) return 'Good';
-        if (score >= 5) return 'Fair';
-        return 'Poor';
-    }
-
     function getShortError(msg) {
         if (msg.includes('DUPLICATE')) return 'Duplicate Record';
         if (msg.includes('LOGIC ERROR')) return 'Timeline Logic Issue';
         if (msg.includes('DOCUMENTATION')) return 'Missing Sources';
         if (msg.includes('DATA GAP')) return 'Missing Locations';
         return 'Flagged';
-    }
-
-    function updateScoreColor(score) {
-        const bg = document.querySelector('.score-main');
-        if (!bg) return;
-        if (score >= 9) bg.style.background = '#2e7d32';
-        else if (score >= 7) bg.style.background = '#1565c0';
-        else if (score >= 5) bg.style.background = '#8d2e2e';
-        else bg.style.background = '#d32f2f';
     }
 
     function getBirthInfo(record) {
