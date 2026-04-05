@@ -101,24 +101,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 li.innerHTML = `
                     <div class="duplicate-pair-header">
-                        <div class="item-sub-col">
-                            <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
-                            <div class="ancestor-info">
-                                <h3>${originalRecord.name} (Original)</h3>
-                                <div class="years">${getBirthInfo(originalRecord)}</div>
-                                <div class="tags"><span class="error-tag" style="background:#e0f7fa;color:#006064">Original Record</span></div>
+                        <div style="font-size:1.1rem; font-weight:800; color:${scoreColor}; margin-bottom:1rem;">Score: ${indivScore}</div>
+                        <div class="duplicate-pair-grid">
+                            <div class="indiv-box">
+                                <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                                <div class="ancestor-info">
+                                    <h3>${originalRecord.name}</h3>
+                                    <div class="years">${getBirthInfo(originalRecord)}</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="item-sub-col">
-                            <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
-                            <div class="ancestor-info">
-                                <h3>${currentRecord.name}</h3>
-                                <div class="years">${getBirthInfo(currentRecord)}</div>
-                                <div class="tags"><span class="error-tag" style="background:#ffebee;color:#c62828">❗ Duplicate</span></div>
+                            <div class="indiv-box">
+                                <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                                <div class="ancestor-info">
+                                    <h3>${currentRecord.name}</h3>
+                                    <div class="years">${getBirthInfo(currentRecord)}</div>
+                                    <div class="tags"><span class="error-tag" style="background:#ffebee;color:#c62828">❗ Duplicate</span></div>
+                                </div>
                             </div>
-                        </div>
-                        <div style="margin-left:auto; display:flex; align-items:center; font-size:1.4rem; font-weight:800; color:${scoreColor}; padding-left:1rem;">
-                            ${indivScore} <span style="font-size:0.8rem; font-weight:400; color:#888; margin-left:2px;">/10</span>
                         </div>
                     </div>
                     <div class="expandable-content">
@@ -138,22 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } else {
                 li.innerHTML = `
-                    <div class="item-header" style="display: flex; width: 100%; align-items: center;">
-                        <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
-                        <div class="ancestor-info">
-                            <h3>${currentRecord.name}</h3>
-                            <div class="years">${getBirthInfo(currentRecord)}</div>
-                            <div class="tags">
-                                ${item.errors.slice(0, 2).map(e => `
-                                    <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">
-                                        ${e.severity === 3 ? '❗' : (e.severity === 2 ? '⚠️' : 'ℹ️')} ${getShortError(e.msg)}
-                                    </span>
-                                `).join('')}
-                                ${item.errors.length > 2 ? `<span class="error-tag">+${item.errors.length - 2} more</span>` : ''}
+                    <div class="item-header" style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <div style="font-size:1.1rem; font-weight:800; color:${scoreColor}; margin-bottom:0.8rem;">Score: ${indivScore}</div>
+                        <div style="display: flex; width: 100%; align-items: center;">
+                            <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                            <div class="ancestor-info">
+                                <h3>${currentRecord.name}</h3>
+                                <div class="years">${getBirthInfo(currentRecord)}</div>
+                                <div class="tags">
+                                    ${item.errors.slice(0, 2).map(e => `
+                                        <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">
+                                            ${e.severity === 3 ? '❗' : (e.severity === 2 ? '⚠️' : 'ℹ️')} ${getShortError(e.msg)}
+                                        </span>
+                                    `).join('')}
+                                    ${item.errors.length > 2 ? `<span class="error-tag">+${item.errors.length - 2} more</span>` : ''}
+                                </div>
                             </div>
-                        </div>
-                        <div style="margin-left:auto; display:flex; align-items:center; font-size:1.4rem; font-weight:800; color:${scoreColor}; padding-left:1rem;">
-                            ${indivScore} <span style="font-size:0.8rem; font-weight:400; color:#888; margin-left:2px;">/10</span>
                         </div>
                     </div>
                     <div class="expandable-content">

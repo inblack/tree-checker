@@ -101,17 +101,31 @@ body {
 
 /* Side-by-Side Duplicate Pairs */
 .duplicate-pair-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
     padding: 1.25rem 1rem;
     cursor: pointer;
     transition: background 0.2s;
-    background: #fffcfc;
-    align-items: center;
+    background: #fdfdfd;
 }
 .duplicate-pair-header:hover { background: #fafafa; }
-.duplicate-pair-header .item-sub-col { display: flex; }
+
+.duplicate-pair-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.indiv-box {
+    border: 2px solid #eaeaea;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
 
 .duplicate-expanded-grid {
     display: grid;
