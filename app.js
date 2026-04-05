@@ -138,14 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } else {
                 li.innerHTML = `
-                    <div class="item-header">
+                    <div class="item-header" style="display: flex; width: 100%; align-items: center;">
                         <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
                         <div class="ancestor-info">
                             <h3>${currentRecord.name}</h3>
                             <div class="years">${getBirthInfo(currentRecord)}</div>
                             <div class="tags">
                                 ${item.errors.slice(0, 2).map(e => `
-                                    <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">${e.msg.split(':')[0]}</span>
+                                    <span class="error-tag" style="${e.severity === 3 ? 'background:#ffebee;color:#c62828' : (e.severity === 2 ? 'background:#fff3e0;color:#ef6c00' : '')}">
+                                        ${e.severity === 3 ? '❗' : (e.severity === 2 ? '⚠️' : 'ℹ️')} ${getShortError(e.msg)}
+                                    </span>
                                 `).join('')}
                                 ${item.errors.length > 2 ? `<span class="error-tag">+${item.errors.length - 2} more</span>` : ''}
                             </div>
@@ -178,6 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score >= 7) return 'Good';
         if (score >= 5) return 'Fair';
         return 'Poor';
+    }
+
+    function getShortError(msg) {
+        if (msg.includes('DUPLICATE')) return 'Duplicate Record';
+        if (msg.includes('LOGIC ERROR')) return 'Timeline Logic Issue';
+        if (msg.includes('DOCUMENTATION')) return 'Missing Sources';
+        if (msg.includes('DATA GAP')) return 'Missing Locations';
+        return 'Flagged';
     }
 
     function updateScoreColor(score) {

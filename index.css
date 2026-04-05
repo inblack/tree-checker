@@ -102,12 +102,13 @@ body {
 /* Side-by-Side Duplicate Pairs */
 .duplicate-pair-header {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr auto;
     gap: 1.5rem;
     padding: 1.25rem 1rem;
     cursor: pointer;
     transition: background 0.2s;
     background: #fffcfc;
+    align-items: center;
 }
 .duplicate-pair-header:hover { background: #fafafa; }
 .duplicate-pair-header .item-sub-col { display: flex; }

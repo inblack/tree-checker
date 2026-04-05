@@ -102,8 +102,9 @@ class GEDCOMParser {
       const errors = [];
 
       // 1. HIGH: Possible Duplicates
-      const key = `${name.toLowerCase()}|${birthYear || '?'}`;
-      if (nameMap.has(key)) {
+      // Requires a known name AND a known birth year, otherwise too many false positives.
+      const key = (name !== 'Unknown' && birthYear) ? `${name.toLowerCase()}|${birthYear}` : null;
+      if (key && nameMap.has(key)) {
         const original = nameMap.get(key);
         errors.push({ 
           type: 'duplicate', 
@@ -112,7 +113,7 @@ class GEDCOMParser {
           originalId: original.id 
         });
         stats.high++;
-      } else {
+      } else if (key) {
         nameMap.set(key, { id, name, years: `${birthYear || '?'}-${deathYear || '?'}` });
       }
 
