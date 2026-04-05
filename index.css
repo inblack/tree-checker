@@ -134,7 +134,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .duplicate-pair-header, .duplicate-expanded-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .duplicate-expanded-grid { grid-template-columns: 1fr; gap: 1rem; }
 }
 
 .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-dim); }

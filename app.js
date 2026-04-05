@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 li.innerHTML = `
                     <div class="duplicate-pair-header">
-                        <div style="font-size:1.1rem; font-weight:800; color:${scoreColor}; margin-bottom:1rem;">Score: ${indivScore}</div>
+                        <div style="font-size:0.85rem; font-weight:700; color:${scoreColor}; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">score=${indivScore}</div>
                         <div class="duplicate-pair-grid">
                             <div class="indiv-box">
                                 <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="ancestor-info">
                                     <h3>${currentRecord.name}</h3>
                                     <div class="years">${getBirthInfo(currentRecord)}</div>
-                                    <div class="tags"><span class="error-tag" style="background:#ffebee;color:#c62828">❗ Duplicate</span></div>
                                 </div>
                             </div>
                         </div>
@@ -138,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 li.innerHTML = `
                     <div class="item-header" style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <div style="font-size:1.1rem; font-weight:800; color:${scoreColor}; margin-bottom:0.8rem;">Score: ${indivScore}</div>
+                        <div style="font-size:0.85rem; font-weight:700; color:${scoreColor}; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">score=${indivScore}</div>
                         <div style="display: flex; width: 100%; align-items: center;">
                             <div class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="#777"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
                             <div class="ancestor-info">
