@@ -5,6 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const parser = new GEDCOMParser();
+    const listElement = document.getElementById('ancestor-list');
+    const summaryText = document.getElementById('summary-text');
     const uploadInput = document.getElementById('upload-input');
     const uploadBtn = document.getElementById('upload-btn');
     const emptyState = document.getElementById('empty-state');
@@ -42,10 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderDashboard() {
-        const { diagnostics } = parser.analyze();
+        const { diagnostics, stats } = parser.analyze();
+        const totalErrors = stats.high + stats.med + stats.low;
+        const indiCount = parser.individuals.size;
+        const famCount = parser.families.size;
 
         emptyState.style.display = 'none';
         resultsSection.style.display = 'block';
+
+        if (summaryText) {
+            summaryText.textContent = `${indiCount} Individuals | ${famCount} Families | ${totalErrors} Errors`;
+        }
 
         listElement.innerHTML = '';
         
