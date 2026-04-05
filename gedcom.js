@@ -128,7 +128,86 @@ class GEDCOMParser {
       }
     }
 
+    // 5. HIGH: Disconnected Individuals (Islands)
+    const islands = this.findIslands();
+    if (islands.length > 1) {
+      // Sort islands by size, largest is the "Main Tree"
+      const sortedIslands = islands.sort((a, b) => b.length - a.length);
+      const mainTreeIds = new Set(sortedIslands[0]);
+      
+      this.individuals.forEach((indi, id) => {
+        if (!mainTreeIds.has(id)) {
+          const name = this.getName(indi);
+          const birthNode = this.getTag(indi, 'BIRT');
+          const birthYear = this.getYear(birthNode);
+          
+          let existingDiag = diagnostics.find(d => d.id === id);
+          if (!existingDiag) {
+            existingDiag = { id, name, birthYear, errors: [] };
+            diagnostics.push(existingDiag);
+          }
+          
+          existingDiag.errors.push({ 
+            type: 'disconnected', 
+            msg: `❗ LVL 3: 🛑 DISCONNECTED: This individual is not linked to the main family tree`, 
+            severity: 3 
+          });
+          stats.high++;
+        }
+      });
+    }
+
     return { diagnostics, stats };
+  }
+
+  buildGraph() {
+    const adj = new Map();
+    this.individuals.forEach((_, id) => adj.set(id, new Set()));
+
+    this.families.forEach(fam => {
+      const husb = this.getTag(fam, 'HUSB')?.data;
+      const wife = this.getTag(fam, 'WIFE')?.data;
+      const children = this.findAllTags(fam, 'CHIL').map(c => c.data);
+      
+      const members = [husb, wife, ...children].filter(id => id && this.individuals.has(id));
+      
+      // Every family member is connected to every other family member via this family unit
+      members.forEach((m1, i) => {
+        members.slice(i + 1).forEach(m2 => {
+          adj.get(m1).add(m2);
+          adj.get(m2).add(m1);
+        });
+      });
+    });
+    return adj;
+  }
+
+  findIslands() {
+    const adj = this.buildGraph();
+    const visited = new Set();
+    const islands = [];
+
+    this.individuals.forEach((_, id) => {
+      if (!visited.has(id)) {
+        const island = [];
+        const stack = [id];
+        visited.add(id);
+        
+        while (stack.length > 0) {
+          const node = stack.pop();
+          island.push(node);
+          
+          (adj.get(node) || []).forEach(neighbor => {
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              stack.push(neighbor);
+            }
+          });
+        }
+        islands.push(island);
+      }
+    });
+    return islands;
   }
 
   getFullRecord(id) {

@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getShortError(msg) {
         if (msg.includes('DUPLICATE')) return 'Duplicate Record';
         if (msg.includes('LOGIC ERROR')) return 'Timeline Logic Issue';
+        if (msg.includes('DISCONNECTED')) return 'Disconnected Record';
         return 'Flagged';
     }
 
